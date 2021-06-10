@@ -10,40 +10,49 @@ Date Created: April 28th 2021
 ###############################################################################
 import os
 import arcpy
+import argparse as ap
 ###############################################################################
 
 
 def main(parent_folder, output_folder, rast_type):
-    # Set the workspace to the raster folder
+    #set the workspace to the raster folder
     arcpy.env.workspace = parent_folder
 
-    # Produce a list of all tifs in the parent folder
+    # get a list of all files
+    file_list = os.listdir(parent_folder)
+
+    # prompt warning if file format not supported
+    for f in file_list:
+      if not f.endswith(('.bmp', '.gif', '.img', '.jp2', '.jpg', '.png', '.tif')):
+      	arcpy.AddWarning(f + ' is not supported.')
+		
+		# produce a list of all tifs in the parent folder
     rast_list = arcpy.ListRasters()
-    
-    # Get the number of rasters in the directory
+
+		# get the number of rasters in the directory
     list_len = len(rast_list)
     
-    # Create a progressor
-    arcpy.SetProgressor('default')
+    # step progressor
+    arcpy.SetProgressor('step', 'Converting...', 0, list_len, 1)
 
-    # Iterate through all rasters and conver them
+    # iterate through all rasters and conver them
     for item in rast_list:
         # Convert the raster
         arcpy.RasterToOtherFormat_conversion(item, output_folder, rast_type)
         # Update the user to which raster was converted
-        arcpy.AddMessage(item)
+        arcpy.AddMessage(item + ' is converted.')
 
 
 ###############################################################################
 
 
 if __name__ == '__main__':
-    # Get the directory containing the original rasters
+    # get the directory containing the original rasters
     parent_folder = arcpy.GetParameterAsText(0)
-    # Get the directory for raster output
+    # get the directory for raster output
     output_folder = arcpy.GetParameterAsText(1)
-    # Get the type of raster to output
+    # get the type of raster to output
     rast_type = arcpy.GetParameterAsText(2)
 
-    # Run the script
+    # run the script
     main(parent_folder, output_folder, rast_type)
